@@ -11,6 +11,7 @@ var game_manager_reference
 var card_slots_reference
 var is_opponent_turn = false
 
+
 func _ready() -> void:
 	opponent_deck.shuffle()
 	card_database_reference = preload("res://Scripts/card_database.gd")
@@ -49,6 +50,9 @@ func draw_card_to_hand():
 	# Set card values using the function
 	new_card.set_card_data(card_drawn, card_database_reference.CARDS[card_drawn])
 	
+	# Set the owner type
+	new_card.owner_type = "opponent"
+	
 	# Add card to opponent's hand
 	add_child(new_card)
 	new_card.name = "OpponentCard_" + card_drawn
@@ -81,8 +85,8 @@ func make_move():
 		var card_to_play = best_move["card"]
 		var slot_to_play = best_move["slot"]
 		
-		# Play the card
-		play_card(card_to_play, slot_to_play)
+		# Play the card with explicit self reference
+		self.play_card(card_to_play, slot_to_play)
 		
 		# Wait a bit before ending turn
 		await get_tree().create_timer(0.5).timeout
@@ -209,6 +213,9 @@ func play_card(card, slot):
 	
 	# Mark the slot as occupied
 	slot.card_in_slot = true
+	
+	# Make sure the card's owner_type is set
+	card.owner_type = "opponent"
 	
 	# Add card to placed cards group for battle checking
 	card.add_to_group("placed_cards")

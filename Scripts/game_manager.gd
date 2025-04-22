@@ -213,8 +213,24 @@ func end_game():
 	ui_reference.show_game_over(winner, player_score, opponent_score)
 
 func reset_game():
-	# Reset the board
+	# First, clear all cards in play
 	for card in get_tree().get_nodes_in_group("placed_cards"):
+		card.queue_free()
+		
+	# Clear ALL cards in the scene - this is more thorough
+	for card in get_tree().get_nodes_in_group("player_cards"):
+		card.queue_free()
+	
+	# Make sure we get all opponent cards too
+	for card in get_tree().get_nodes_in_group("opponent_cards"):
+		card.queue_free()
+	
+	# Extra check - find any Card nodes that might not be in a group
+	for card in get_tree().get_nodes_in_group("Card"):
+		card.queue_free()
+	
+	# Even more thorough - get all nodes that are children of the CardManager
+	for card in $"../CardManager".get_children():
 		card.queue_free()
 	
 	# Reset card slots
@@ -222,22 +238,43 @@ func reset_game():
 		if slot.has_method("get"):
 			slot.card_in_slot = false
 	
-	# Reset player hand
-	$"../PlayerHand".player_hand.clear()
+	# Reset player hand - both the reference and any actual cards
+	var player_hand_node = $"../PlayerHand"
+	player_hand_node.player_hand.clear()
 	
-	# Reset opponent
-	for card in opponent_reference.opponent_hand:
-		card.queue_free()
+	# Reset opponent - both the reference and any actual cards
 	opponent_reference.opponent_hand.clear()
 	
-	# Refill decks and start a new game
-	$"../Deck".player_deck = ["Knight", "Archer", "Mage", "Knight"]
-	$"../Deck".player_deck.shuffle()
-	$"../Deck"._ready()
+	# Reset deck references and nodes
+	var deck_node = $"../Deck"
+	# Restore full decks with randomized order
+	deck_node.player_deck = ["Knight", "Archer", "Mage", "Knight", "Archer", "Mage", "Knight", "Archer"]
+	deck_node.player_deck.shuffle()
+	# Reset UI elements on deck
+	deck_node.get_node("RichTextLabel").text = str(deck_node.player_deck.size())
+	deck_node.get_node("Area2D/CollisionShape2D").disabled = false
+	deck_node.get_node("Sprite2D").visible = true
+	deck_node.get_node("RichTextLabel").visible = true
 	
-	opponent_reference.opponent_deck = ["Knight", "Archer", "Mage", "Knight"]
+	# Reset opponent deck
+	opponent_reference.opponent_deck = ["Knight", "Archer", "Mage", "Knight", "Archer", "Mage", "Knight", "Archer"]
 	opponent_reference.opponent_deck.shuffle()
-	opponent_reference._ready()
+	
+	# Wait a moment to ensure all cards are properly removed
+	await get_tree().create_timer(0.1).timeout
+	
+	# Draw initial hands
+	for i in range(5):
+		deck_node.draw_card()
+	
+	for i in range(5):
+		opponent_reference.draw_card_to_hand()
+	
+	# Reset game state and score
+	player_score = 5
+	opponent_score = 5
+	total_turns = 0
+	current_state = GAME_STATE.SETUP
 	
 	# Start a new game
 	start_game()

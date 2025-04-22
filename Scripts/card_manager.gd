@@ -28,6 +28,9 @@ func start_drag(card):
 	# Only allow dragging cards during player's turn
 	if game_manager_reference.current_state != game_manager_reference.GAME_STATE.PLAYER_TURN:
 		return
+	
+	if card.owner_type != "player":
+		return
 		
 	card_being_dragged = card
 	card.scale = Vector2(1,1)

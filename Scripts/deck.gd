@@ -33,6 +33,9 @@ func draw_card():
 	var card_scene = preload(CARD_SCENE_PATH)
 	var new_card = card_scene.instantiate()
 	
+	new_card.owner_type = "player"
+	new_card.set_card_owner("player")  # This will create and update the border
+	
 	# Load card image
 	var card_image_path = str("res://Images/" + card_drawn + "Card.jpeg")
 	new_card.get_node("CardImage").texture = load(card_image_path)
