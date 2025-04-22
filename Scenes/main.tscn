@@ -1,0 +1,153 @@
+[gd_scene load_steps=14 format=3 uid="uid://di16rum7s7de1"]
+
+[ext_resource type="Script" uid="uid://bvxskgctkk37t" path="res://Scenes/main.gd" id="1_344ge"]
+[ext_resource type="Script" uid="uid://bkgj6vao7e8hy" path="res://Scripts/card_manager.gd" id="1_bo1nx"]
+[ext_resource type="Script" uid="uid://ch7b1dfybpove" path="res://Scripts/card_battle.gd" id="2_6iyac"]
+[ext_resource type="Script" uid="uid://dtmhbmy7uwns3" path="res://Scripts/opponent.gd" id="2_d1ilt"]
+[ext_resource type="Script" uid="uid://bas6ydd8hx053" path="res://Scripts/game_manager.gd" id="3_6iyac"]
+[ext_resource type="PackedScene" uid="uid://bvh64xf5hh52y" path="res://Scenes/card_slot.tscn" id="3_8gbba"]
+[ext_resource type="Script" uid="uid://358k6e258bdc" path="res://Scripts/player_hand.gd" id="3_jjvhh"]
+[ext_resource type="Script" uid="uid://b4anfp4s67lbn" path="res://Scripts/deck.gd" id="4_21xkr"]
+[ext_resource type="Texture2D" uid="uid://c7soelutudlxw" path="res://Images/deck.png" id="4_jjvhh"]
+[ext_resource type="Script" uid="uid://c6pa5mnkmdwtw" path="res://Scripts/input_manager.gd" id="6_6bp64"]
+[ext_resource type="Script" uid="uid://cbqqv0qu86h1l" path="res://Scripts/card_slots.gd" id="6_6iyac"]
+[ext_resource type="Script" uid="uid://ddnlsmdtvtf17" path="res://Scripts/ui.gd" id="11_fdnlq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kry3j"]
+size = Vector2(180, 257)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_344ge")
+
+[node name="CardBattle" type="Node2D" parent="."]
+script = ExtResource("2_6iyac")
+
+[node name="Opponent" type="Node2D" parent="."]
+script = ExtResource("2_d1ilt")
+
+[node name="GameManager" type="Node2D" parent="."]
+script = ExtResource("3_6iyac")
+
+[node name="CardManager" type="Node2D" parent="."]
+script = ExtResource("1_bo1nx")
+
+[node name="CardSlots" type="Node2D" parent="."]
+script = ExtResource("6_6iyac")
+
+[node name="CardSlot" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(838, 181)
+
+[node name="CardSlot2" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1030, 181)
+
+[node name="CardSlot3" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(837, 460)
+
+[node name="CardSlot4" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(836, 739)
+
+[node name="CardSlot5" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1030, 461)
+
+[node name="CardSlot6" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1030, 741)
+
+[node name="CardSlot7" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1224, 183)
+
+[node name="CardSlot8" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1224, 462)
+
+[node name="CardSlot9" parent="CardSlots" instance=ExtResource("3_8gbba")]
+position = Vector2(1225, 742)
+
+[node name="PlayerHand" type="Node2D" parent="."]
+script = ExtResource("3_jjvhh")
+
+[node name="Deck" type="Node2D" parent="."]
+position = Vector2(150, 890)
+script = ExtResource("4_21xkr")
+
+[node name="Sprite2D" type="Sprite2D" parent="Deck"]
+z_index = -2
+scale = Vector2(0.252778, 0.257813)
+texture = ExtResource("4_jjvhh")
+
+[node name="Area2D" type="Area2D" parent="Deck"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Deck/Area2D"]
+position = Vector2(0, 2.5)
+shape = SubResource("RectangleShape2D_kry3j")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Deck"]
+modulate = Color(0, 0, 0, 1)
+z_index = -2
+offset_left = -9.0
+offset_top = -28.0
+offset_right = 31.0
+offset_bottom = 12.0
+scale = Vector2(2, 2)
+text = "0"
+
+[node name="InputManager" type="Node2D" parent="."]
+script = ExtResource("6_6bp64")
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("11_fdnlq")
+
+[node name="ScoreDisplay" type="Label" parent="UI"]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "score display"
+
+[node name="TurnDisplay" type="Label" parent="UI"]
+offset_left = -1.0
+offset_top = 46.0
+offset_right = 39.0
+offset_bottom = 69.0
+text = "Turn Display"
+
+[node name="CoinFlipPanel" type="Panel" parent="UI"]
+offset_left = 68.0
+offset_top = 149.0
+offset_right = 108.0
+offset_bottom = 189.0
+
+[node name="FlipButton" type="Button" parent="UI/CoinFlipPanel"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Coin Flip Button
+"
+
+[node name="GameOverPanel" type="Panel" parent="UI"]
+offset_left = 65.0
+offset_top = 272.0
+offset_right = 105.0
+offset_bottom = 312.0
+
+[node name="ResultLabel" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 0
+offset_left = 297.0
+offset_top = 8.0
+offset_right = 337.0
+offset_bottom = 31.0
+text = "result label"
+
+[node name="ScoreLabel" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 0
+offset_left = 292.0
+offset_top = 54.0
+offset_right = 332.0
+offset_bottom = 77.0
+
+[node name="PlayAgainButton" type="Button" parent="UI/GameOverPanel"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Play Again Button"
+
+[connection signal="pressed" from="UI/CoinFlipPanel/FlipButton" to="UI" method="_on_flip_button_pressed"]
+[connection signal="pressed" from="UI/GameOverPanel/PlayAgainButton" to="UI" method="_on_play_again_button_pressed"]
