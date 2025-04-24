@@ -6,6 +6,13 @@ func _ready():
 	for slot in get_children():
 		if slot.has_method("get"):
 			slot.card_in_slot = false
+	
+	# Print the positions of all slots for debugging
+	print("DEBUG: Card slot positions:")
+	for i in range(get_child_count()):
+		var slot = get_child(i)
+		if slot.has_method("get"):
+			print("DEBUG: Slot", i, "position:", slot.position)
 
 # Get all empty slots
 func get_empty_slots():
@@ -41,3 +48,19 @@ func reset_board():
 	for slot in get_children():
 		if slot.has_method("get"):
 			slot.card_in_slot = false
+			print("DEBUG: Reset slot at position", slot.position)
+
+# Get the exact distance between slots
+func get_slot_spacing():
+	# This can be useful for debugging
+	if get_child_count() >= 2:
+		var first_slot = get_child(0)
+		var second_slot = get_child(1)
+		
+		if first_slot.has_method("get") and second_slot.has_method("get"):
+			var x_diff = abs(second_slot.position.x - first_slot.position.x)
+			var y_diff = abs(second_slot.position.y - first_slot.position.y)
+			print("DEBUG: Slot spacing - X:", x_diff, "Y:", y_diff)
+			return Vector2(x_diff, y_diff)
+	
+	return Vector2.ZERO

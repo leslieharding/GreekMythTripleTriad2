@@ -66,8 +66,13 @@ func perform_coin_flip():
 func _on_card_played(card):
 	# A card was played by the player
 	if current_state == GAME_STATE.PLAYER_TURN:
+		print("DEBUG: Player played a card, checking for battles")
+		# Add debug print to show the card values
+		print("DEBUG: Card values - N:", card.values[0], "E:", card.values[1], "S:", card.values[2], "W:", card.values[3])
+		
 		# Check for card battles
-		check_card_battles(card, "player")
+		var captured_cards = check_card_battles(card, "player")
+		print("DEBUG: Captured", captured_cards.size(), "cards")
 		
 		# End player's turn
 		end_turn()
@@ -104,12 +109,20 @@ func end_turn():
 func check_card_battles(card, owner):
 	# Get adjacent cards to the played card
 	var adjacent_cards = get_adjacent_cards(card)
+	var captured_cards = []
+	
+	print("DEBUG: Found", adjacent_cards.size(), "adjacent cards for", owner, "at position", card.position)
 	
 	for adjacent_card in adjacent_cards:
-		# Determine which values to compare based on relative position
+		# Determine which values to compare based on relative direction
 		var played_card_value = 0
 		var adjacent_card_value = 0
 		var direction = adjacent_card["direction"]
+		
+		# Print the cards being compared
+		print("DEBUG: Comparing", owner, "card with", 
+			  "player" if adjacent_card["card"].is_in_group("player_cards") else "opponent", 
+			  "card in direction", direction)
 		
 		match direction:
 			"north":
@@ -125,10 +138,27 @@ func check_card_battles(card, owner):
 				played_card_value = card.values[3]  # West value of played card
 				adjacent_card_value = adjacent_card["card"].values[1]  # East value of adjacent card
 		
+		print("DEBUG: Battle direction:", direction)
+		print("DEBUG: Played card value:", played_card_value, "vs Adjacent card value:", adjacent_card_value)
+		
+		# Only check for capture if the adjacent card is owned by the other player
+		var can_capture = false
+		if owner == "player" and adjacent_card["card"].is_in_group("opponent_cards"):
+			can_capture = played_card_value > adjacent_card_value
+		elif owner == "opponent" and adjacent_card["card"].is_in_group("player_cards"):
+			can_capture = played_card_value > adjacent_card_value
+			print("DEBUG: Opponent trying to capture player card. Can capture:", can_capture)
+		
 		# Check if card can be captured
-		if played_card_value > adjacent_card_value:
+		if can_capture:
+			print("DEBUG: Capture successful!")
 			# Capture the card
 			capture_card(adjacent_card["card"], owner)
+			captured_cards.append(adjacent_card["card"])
+		else:
+			print("DEBUG: No capture - either values don't allow it or card already owned")
+	
+	return captured_cards
 
 func get_adjacent_cards(card):
 	var adjacent_cards = []
@@ -137,30 +167,43 @@ func get_adjacent_cards(card):
 	# Find all cards on the board
 	var placed_cards = get_tree().get_nodes_in_group("placed_cards")
 	
+	print("DEBUG: Total placed cards on board:", placed_cards.size())
+	print("DEBUG: Played card position:", card_pos)
+	
 	for other_card in placed_cards:
 		if other_card != card:
 			var other_pos = other_card.position
+			print("DEBUG: Checking card at position:", other_pos)
 			
-			# North
-			if other_pos.x == card_pos.x and other_pos.y == card_pos.y - 200:
+			# Check each direction with exact position checks
+			# North - exactly 0 difference in X, exactly -279 difference in Y
+			if abs(other_pos.x - card_pos.x) < 10 and abs(other_pos.y - card_pos.y + 279) < 10:
 				adjacent_cards.append({"card": other_card, "direction": "north"})
-			# East
-			elif other_pos.x == card_pos.x + 200 and other_pos.y == card_pos.y:
+				print("DEBUG: Found north adjacent card")
+			# East - exactly +194 difference in X, exactly 0 difference in Y
+			elif abs(other_pos.x - card_pos.x - 194) < 10 and abs(other_pos.y - card_pos.y) < 10:
 				adjacent_cards.append({"card": other_card, "direction": "east"})
-			# South
-			elif other_pos.x == card_pos.x and other_pos.y == card_pos.y + 200:
+				print("DEBUG: Found east adjacent card")
+			# South - exactly 0 difference in X, exactly +279 difference in Y
+			elif abs(other_pos.x - card_pos.x) < 10 and abs(other_pos.y - card_pos.y - 279) < 10:
 				adjacent_cards.append({"card": other_card, "direction": "south"})
-			# West
-			elif other_pos.x == card_pos.x - 200 and other_pos.y == card_pos.y:
+				print("DEBUG: Found south adjacent card")
+			# West - exactly -194 difference in X, exactly 0 difference in Y
+			elif abs(other_pos.x - card_pos.x + 194) < 10 and abs(other_pos.y - card_pos.y) < 10:
 				adjacent_cards.append({"card": other_card, "direction": "west"})
+				print("DEBUG: Found west adjacent card")
 	
 	return adjacent_cards
 
 func capture_card(card, new_owner):
+	print("DEBUG: Capturing card for", new_owner)
+	
 	# Change card ownership
 	if new_owner == "player":
 		if card.is_in_group("opponent_cards"):
-			card.set_card_owner("player") # Use set_card_owner instead of set_owner
+			card.remove_from_group("opponent_cards")
+			card.add_to_group("player_cards")
+			card.set_card_owner("player")
 			player_score += 1
 			opponent_score -= 1
 			
@@ -169,7 +212,9 @@ func capture_card(card, new_owner):
 			
 	elif new_owner == "opponent":
 		if card.is_in_group("player_cards"):
-			card.set_card_owner("opponent") # Use set_card_owner instead of set_owner
+			card.remove_from_group("player_cards")
+			card.add_to_group("opponent_cards")
+			card.set_card_owner("opponent")
 			opponent_score += 1
 			player_score -= 1
 			

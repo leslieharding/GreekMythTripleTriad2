@@ -13,10 +13,10 @@ func _ready() -> void:
 	get_parent().connect_card_signals(self)
 	create_border()
 	
-func on_area_2d_mouse_entered() -> void:
+func _on_area_2d_mouse_entered() -> void:
 	emit_signal("hovered", self)
 	
-func on_area_2d_mouse_exited() -> void:
+func _on_area_2d_mouse_exited() -> void:
 	emit_signal("hovered_off", self)
 	
 # New function to set card values
@@ -28,22 +28,37 @@ func set_card_data(name, card_values):
 	$South.text = str(values[2])
 	$West.text = str(values[3])
 	
+	print("DEBUG: Card data set - Name:", name, "Values:", values)
+	
 # Change card visually to show ownership - renamed from set_owner to avoid conflicts
 func set_card_owner(new_owner):
+	print("DEBUG: Setting card owner to", new_owner)
 	owner_type = new_owner
 	
 	if owner_type == "player":
 		# Set player card styling (blue border)
 		update_border(Color(0, 0, 1, 0.7))
+		
+		# Update groups
 		if is_in_group("opponent_cards"):
 			remove_from_group("opponent_cards")
-		add_to_group("player_cards")
+			print("DEBUG: Removed from opponent_cards group")
+		
+		if not is_in_group("player_cards"):
+			add_to_group("player_cards")
+			print("DEBUG: Added to player_cards group")
 	else:
 		# Set opponent card styling (red border)
 		update_border(Color(1, 0, 0, 0.7))
+		
+		# Update groups
 		if is_in_group("player_cards"):
 			remove_from_group("player_cards")
-		add_to_group("opponent_cards")
+			print("DEBUG: Removed from player_cards group")
+			
+		if not is_in_group("opponent_cards"):
+			add_to_group("opponent_cards")
+			print("DEBUG: Added to opponent_cards group")
 
 # Create the border around the card
 func create_border():
@@ -68,11 +83,13 @@ func create_border():
 		border_color = border.color
 		
 		add_child(border)
+		print("DEBUG: Created card border for", owner_type)
 
 # Update the border color
 func update_border(color):
 	border_color = color
 	if has_node("CardBorder"):
 		$CardBorder.color = color
+		print("DEBUG: Updated border color to", color)
 	else:
 		create_border()

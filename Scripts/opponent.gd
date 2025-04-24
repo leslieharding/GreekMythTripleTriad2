@@ -52,6 +52,7 @@ func draw_card_to_hand():
 	
 	# Set the owner type
 	new_card.owner_type = "opponent"
+	new_card.set_card_owner("opponent")  # Make sure to explicitly set card owner
 	
 	# Add card to opponent's hand
 	add_child(new_card)
@@ -62,14 +63,14 @@ func draw_card_to_hand():
 
 # Make the opponent's move when it's their turn
 func make_move():
-	print("Opponent turn: " + str(is_opponent_turn) + " Hand size: " + str(opponent_hand.size()))
+	print("DEBUG: Opponent turn: " + str(is_opponent_turn) + " Hand size: " + str(opponent_hand.size()))
 	
 	if not is_opponent_turn:
-		print("Not opponent turn, skipping move")
+		print("DEBUG: Not opponent turn, skipping move")
 		return
 		
 	if opponent_hand.size() == 0:
-		print("Opponent has no cards, skipping move")
+		print("DEBUG: Opponent has no cards, skipping move")
 		is_opponent_turn = false
 		emit_signal("turn_ended")
 		return
@@ -81,12 +82,12 @@ func make_move():
 	var best_move = find_best_move()
 	
 	if best_move:
-		print("Opponent found a move to make")
+		print("DEBUG: Opponent found a move to make")
 		var card_to_play = best_move["card"]
 		var slot_to_play = best_move["slot"]
 		
-		# Play the card with explicit self reference
-		self.play_card(card_to_play, slot_to_play)
+		# Play the card
+		play_card(card_to_play, slot_to_play)
 		
 		# Wait a bit before ending turn
 		await get_tree().create_timer(0.5).timeout
@@ -95,7 +96,7 @@ func make_move():
 		is_opponent_turn = false
 		emit_signal("turn_ended")
 	else:
-		print("No valid moves found for opponent")
+		print("DEBUG: No valid moves found for opponent")
 		# No valid moves, end turn
 		is_opponent_turn = false
 		emit_signal("turn_ended")
@@ -111,7 +112,7 @@ func find_best_move():
 		if slot.has_method("get") and not slot.card_in_slot:
 			empty_slots.append(slot)
 	
-	print("Found " + str(empty_slots.size()) + " empty slots")
+	print("DEBUG: Found " + str(empty_slots.size()) + " empty slots")
 	
 	# If no empty slots, return null
 	if empty_slots.size() == 0:
@@ -160,7 +161,8 @@ func calculate_move_score(card, slot):
 						their_value = adjacent_card.values[3]  # West value of their card
 				
 				# If our value is higher, we can capture
-				if our_value > their_value:
+				if our_value > their_value and adjacent_card.is_in_group("player_cards"):
+					print("DEBUG: Found potential capture - Our", our_value, "vs Their", their_value)
 					score += 3  # Prioritize captures
 	
 	# Add some randomness to avoid predictable AI
@@ -178,17 +180,18 @@ func get_adjacent_slots(slot):
 		if other_slot.has_method("get") and other_slot != slot:
 			var other_pos = other_slot.position
 			
-			# North
-			if other_pos.x == slot_pos.x and other_pos.y == slot_pos.y - 200:
+			# Use the same position checking as in game_manager.gd
+			# North - check with tolerance
+			if abs(other_pos.x - slot_pos.x) < 10 and abs(other_pos.y - slot_pos.y + 279) < 10:
 				adjacent_slots.append({"slot": other_slot, "direction": "north"})
-			# East
-			elif other_pos.x == slot_pos.x + 200 and other_pos.y == slot_pos.y:
+			# East - check with tolerance
+			elif abs(other_pos.x - slot_pos.x - 194) < 10 and abs(other_pos.y - slot_pos.y) < 10:
 				adjacent_slots.append({"slot": other_slot, "direction": "east"})
-			# South
-			elif other_pos.x == slot_pos.x and other_pos.y == slot_pos.y + 200:
+			# South - check with tolerance
+			elif abs(other_pos.x - slot_pos.x) < 10 and abs(other_pos.y - slot_pos.y - 279) < 10:
 				adjacent_slots.append({"slot": other_slot, "direction": "south"})
-			# West
-			elif other_pos.x == slot_pos.x - 200 and other_pos.y == slot_pos.y:
+			# West - check with tolerance
+			elif abs(other_pos.x - slot_pos.x + 194) < 10 and abs(other_pos.y - slot_pos.y) < 10:
 				adjacent_slots.append({"slot": other_slot, "direction": "west"})
 	
 	return adjacent_slots
@@ -205,28 +208,42 @@ func get_card_in_slot(slot):
 func play_card(card, slot):
 	# Remove card from opponent's hand
 	opponent_hand.erase(card)
-	print("Opponent played a card. Cards remaining: " + str(opponent_hand.size()))
+	print("DEBUG: Opponent played a card. Cards remaining: " + str(opponent_hand.size()))
+	print("DEBUG: Card values - N:", card.values[0], "E:", card.values[1], "S:", card.values[2], "W:", card.values[3])
+	
+	# Make sure the card's owner_type is set correctly BEFORE moving it
+	card.owner_type = "opponent"
+	card.set_card_owner("opponent")
+	
+	# Ensure the card is in the right groups
+	if not card.is_in_group("opponent_cards"):
+		card.add_to_group("opponent_cards")
 	
 	# Move the card to the slot
-	var tween = get_tree().create_tween()
-	tween.tween_property(card, "position", slot.position, 0.5)
+	var original_position = card.position
+	card.position = slot.position
 	
 	# Mark the slot as occupied
 	slot.card_in_slot = true
 	
-	# Make sure the card's owner_type is set
-	card.owner_type = "opponent"
-	
 	# Add card to placed cards group for battle checking
-	card.add_to_group("placed_cards")
-	card.add_to_group("opponent_cards")
+	if not card.is_in_group("placed_cards"):
+		card.add_to_group("placed_cards")
 	
-	# Check if this card captures adjacent cards
-	game_manager_reference.check_card_battles(card, "opponent")
+	print("DEBUG: Opponent card moved from", original_position, "to", slot.position)
+	
+	# IMPORTANT: Wait a moment to ensure the card is fully placed before checking battles
+	# This ensures the position is fully updated
+	await get_tree().create_timer(0.1).timeout
+	
+	print("DEBUG: Checking battles for opponent card at", card.position)
+	# After the card is in position, check if this card captures adjacent cards
+	var captured_cards = game_manager_reference.check_card_battles(card, "opponent")
+	print("DEBUG: Opponent captured", captured_cards.size() if captured_cards else 0, "cards")
 
 # Set if it's the opponent's turn
 func set_turn(is_turn):
-	print("Setting opponent turn to: " + str(is_turn))
+	print("DEBUG: Setting opponent turn to: " + str(is_turn))
 	is_opponent_turn = is_turn
 	if is_opponent_turn:
 		make_move()
