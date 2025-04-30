@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3 uid="uid://di16rum7s7de1"]
 
-[ext_resource type="Script" uid="uid://bvxskgctkk37t" path="res://Scenes/main.gd" id="1_344ge"]
+[ext_resource type="Script" uid="uid://bvxskgctkk37t" path="res://Scripts/main.gd" id="1_344ge"]
 [ext_resource type="Script" uid="uid://bkgj6vao7e8hy" path="res://Scripts/card_manager.gd" id="1_bo1nx"]
 [ext_resource type="Script" uid="uid://ch7b1dfybpove" path="res://Scripts/card_battle.gd" id="2_6iyac"]
 [ext_resource type="Script" uid="uid://dtmhbmy7uwns3" path="res://Scripts/opponent.gd" id="2_d1ilt"]
