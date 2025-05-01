@@ -170,26 +170,31 @@ func get_adjacent_cards(card):
 	print("DEBUG: Total placed cards on board:", placed_cards.size())
 	print("DEBUG: Played card position:", card_pos)
 	
+	# Updated slot spacing values to match the new card and slot sizes
+	var slot_spacing_x = 154  # Horizontal spacing between slots
+	var slot_spacing_y = 208  # Vertical spacing between slots
+	var tolerance = 10  # Tolerance for position checking
+	
 	for other_card in placed_cards:
 		if other_card != card:
 			var other_pos = other_card.position
 			print("DEBUG: Checking card at position:", other_pos)
 			
-			# Check each direction with exact position checks
-			# North - exactly 0 difference in X, exactly -279 difference in Y
-			if abs(other_pos.x - card_pos.x) < 10 and abs(other_pos.y - card_pos.y + 279) < 10:
+			# Check each direction with exact position checks using updated spacing
+			# North - same X position, Y position is one slot higher
+			if abs(other_pos.x - card_pos.x) < tolerance and abs(other_pos.y - (card_pos.y - slot_spacing_y)) < tolerance:
 				adjacent_cards.append({"card": other_card, "direction": "north"})
 				print("DEBUG: Found north adjacent card")
-			# East - exactly +194 difference in X, exactly 0 difference in Y
-			elif abs(other_pos.x - card_pos.x - 194) < 10 and abs(other_pos.y - card_pos.y) < 10:
+			# East - X position is one slot to the right, same Y position
+			elif abs(other_pos.x - (card_pos.x + slot_spacing_x)) < tolerance and abs(other_pos.y - card_pos.y) < tolerance:
 				adjacent_cards.append({"card": other_card, "direction": "east"})
 				print("DEBUG: Found east adjacent card")
-			# South - exactly 0 difference in X, exactly +279 difference in Y
-			elif abs(other_pos.x - card_pos.x) < 10 and abs(other_pos.y - card_pos.y - 279) < 10:
+			# South - same X position, Y position is one slot lower
+			elif abs(other_pos.x - card_pos.x) < tolerance and abs(other_pos.y - (card_pos.y + slot_spacing_y)) < tolerance:
 				adjacent_cards.append({"card": other_card, "direction": "south"})
 				print("DEBUG: Found south adjacent card")
-			# West - exactly -194 difference in X, exactly 0 difference in Y
-			elif abs(other_pos.x - card_pos.x + 194) < 10 and abs(other_pos.y - card_pos.y) < 10:
+			# West - X position is one slot to the left, same Y position
+			elif abs(other_pos.x - (card_pos.x - slot_spacing_x)) < tolerance and abs(other_pos.y - card_pos.y) < tolerance:
 				adjacent_cards.append({"card": other_card, "direction": "west"})
 				print("DEBUG: Found west adjacent card")
 	

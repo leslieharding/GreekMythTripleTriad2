@@ -5,6 +5,10 @@ extends Node2D
 # Direction constants
 enum DIRECTION {NORTH, EAST, SOUTH, WEST}
 
+# Card dimensions
+const CARD_WIDTH = 146
+const CARD_HEIGHT = 197
+
 func _ready():
 	pass
 
@@ -28,14 +32,20 @@ func check_battles(played_card, owner, board_slots):
 
 # Determine the relative direction between two card positions
 func get_relative_direction(from_pos, to_pos):
-	# Cards are spaced 200 units apart
-	if to_pos.y == from_pos.y - 200 and to_pos.x == from_pos.x:
+	# Get the slot spacing - this should match with your layout in the editor
+	var slot_spacing_x = 154  # Updated horizontal spacing between slots
+	var slot_spacing_y = 208  # Updated vertical spacing between slots
+	
+	# Check directions with a small tolerance
+	var tolerance = 10
+	
+	if abs(to_pos.y - (from_pos.y - slot_spacing_y)) < tolerance and abs(to_pos.x - from_pos.x) < tolerance:
 		return DIRECTION.NORTH
-	elif to_pos.x == from_pos.x + 200 and to_pos.y == from_pos.y:
+	elif abs(to_pos.x - (from_pos.x + slot_spacing_x)) < tolerance and abs(to_pos.y - from_pos.y) < tolerance:
 		return DIRECTION.EAST
-	elif to_pos.y == from_pos.y + 200 and to_pos.x == from_pos.x:
+	elif abs(to_pos.y - (from_pos.y + slot_spacing_y)) < tolerance and abs(to_pos.x - from_pos.x) < tolerance:
 		return DIRECTION.SOUTH
-	elif to_pos.x == from_pos.x - 200 and to_pos.y == from_pos.y:
+	elif abs(to_pos.x - (from_pos.x - slot_spacing_x)) < tolerance and abs(to_pos.y - from_pos.y) < tolerance:
 		return DIRECTION.WEST
 	return -1  # Not adjacent
 
@@ -90,8 +100,9 @@ func flash_card(card, new_owner):
 	
 	var flash = ColorRect.new()
 	flash.color = flash_color
-	flash.size = Vector2(180, 180)
-	flash.position = Vector2(-90, -90)
+	# Update size and position to match the card's actual size
+	flash.size = Vector2(CARD_WIDTH, CARD_HEIGHT)
+	flash.position = Vector2(-CARD_WIDTH/2, -CARD_HEIGHT/2)
 	card.add_child(flash)
 	
 	# Animate the flash

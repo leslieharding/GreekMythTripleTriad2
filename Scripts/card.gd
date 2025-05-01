@@ -9,6 +9,10 @@ var values = [0, 0, 0, 0]  # [North, East, South, West]
 var owner_type = "player"  # "player" or "opponent"
 var border_color = Color(0, 0, 0, 0)  # Default transparent border
 
+# Card dimensions - centralized for easy adjustment
+const CARD_WIDTH = 146  # Match the CollisionShape2D width in the scene
+const CARD_HEIGHT = 197 # Match the CollisionShape2D height in the scene
+
 func _ready() -> void:
 	get_parent().connect_card_signals(self)
 	create_border()
@@ -66,9 +70,9 @@ func create_border():
 		var border = ColorRect.new()
 		border.name = "CardBorder"
 		
-		# Size it to be slightly larger than the card
-		border.size = Vector2(200, 250)
-		border.position = Vector2(-100, -125)
+		# Size it to match the card dimensions
+		border.size = Vector2(CARD_WIDTH + 10, CARD_HEIGHT + 10)  # Slightly larger than the card
+		border.position = Vector2(-CARD_WIDTH/2 - 5, -CARD_HEIGHT/2 - 5)  # Center the border around the card
 		
 		# Set initial color based on owner
 		if owner_type == "player":

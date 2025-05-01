@@ -175,23 +175,28 @@ func get_adjacent_slots(slot):
 	var adjacent_slots = []
 	var slot_pos = slot.position
 	
+	# Updated slot spacing values to match the new layout
+	var slot_spacing_x = 154  # Horizontal spacing between slots
+	var slot_spacing_y = 208  # Vertical spacing between slots
+	var tolerance = 10  # Tolerance for position checking
+	
 	# Check all card slots for adjacency
 	for other_slot in card_slots_reference.get_children():
 		if other_slot.has_method("get") and other_slot != slot:
 			var other_pos = other_slot.position
 			
-			# Use the same position checking as in game_manager.gd
+			# Use updated position checking with the new spacing values
 			# North - check with tolerance
-			if abs(other_pos.x - slot_pos.x) < 10 and abs(other_pos.y - slot_pos.y + 279) < 10:
+			if abs(other_pos.x - slot_pos.x) < tolerance and abs(other_pos.y - (slot_pos.y - slot_spacing_y)) < tolerance:
 				adjacent_slots.append({"slot": other_slot, "direction": "north"})
 			# East - check with tolerance
-			elif abs(other_pos.x - slot_pos.x - 194) < 10 and abs(other_pos.y - slot_pos.y) < 10:
+			elif abs(other_pos.x - (slot_pos.x + slot_spacing_x)) < tolerance and abs(other_pos.y - slot_pos.y) < tolerance:
 				adjacent_slots.append({"slot": other_slot, "direction": "east"})
 			# South - check with tolerance
-			elif abs(other_pos.x - slot_pos.x) < 10 and abs(other_pos.y - slot_pos.y - 279) < 10:
+			elif abs(other_pos.x - slot_pos.x) < tolerance and abs(other_pos.y - (slot_pos.y + slot_spacing_y)) < tolerance:
 				adjacent_slots.append({"slot": other_slot, "direction": "south"})
 			# West - check with tolerance
-			elif abs(other_pos.x - slot_pos.x + 194) < 10 and abs(other_pos.y - slot_pos.y) < 10:
+			elif abs(other_pos.x - (slot_pos.x - slot_spacing_x)) < tolerance and abs(other_pos.y - slot_pos.y) < tolerance:
 				adjacent_slots.append({"slot": other_slot, "direction": "west"})
 	
 	return adjacent_slots
