@@ -17,6 +17,7 @@
 size = Vector2(180, 257)
 
 [node name="Main" type="Node2D"]
+position = Vector2(-7, -50)
 script = ExtResource("1_344ge")
 
 [node name="CardBattle" type="Node2D" parent="."]
@@ -35,31 +36,31 @@ script = ExtResource("1_bo1nx")
 script = ExtResource("6_6iyac")
 
 [node name="CardSlot" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(838, 181)
+position = Vector2(809, 183)
 
 [node name="CardSlot2" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1030, 181)
+position = Vector2(963, 183)
 
 [node name="CardSlot3" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(837, 460)
+position = Vector2(810, 393)
 
 [node name="CardSlot4" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(836, 739)
+position = Vector2(810, 601)
 
 [node name="CardSlot5" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1030, 461)
+position = Vector2(963, 392)
 
 [node name="CardSlot6" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1030, 741)
+position = Vector2(963, 600)
 
 [node name="CardSlot7" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1224, 183)
+position = Vector2(1116, 182)
 
 [node name="CardSlot8" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1224, 462)
+position = Vector2(1117, 391)
 
 [node name="CardSlot9" parent="CardSlots" instance=ExtResource("3_8gbba")]
-position = Vector2(1225, 742)
+position = Vector2(1117, 599)
 
 [node name="PlayerHand" type="Node2D" parent="."]
 script = ExtResource("3_jjvhh")
